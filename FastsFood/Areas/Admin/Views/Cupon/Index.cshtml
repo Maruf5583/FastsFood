@@ -1,0 +1,118 @@
+﻿@model IEnumerable<FastsFood.Models.Cupon>
+
+@{
+    ViewData["Title"] = "Cupon Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Cupon Management</h3>
+            <div class="card-tools">
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Cupon
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Discount</th>
+                        <th>Minimum Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Title</td>
+                            <td>@item.Type</td>
+                            <td>
+                                @if (item.Type == CuponType.Percentage)
+                                {
+                                    @item.Discount.ToString("0")
+                                    @:%
+                                }
+                                else
+                                {
+                                    @item.Discount.ToString("C")
+                                }
+                            </td>
+                            <td>@item.MinimumAmount.ToString("C")</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge badge-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                    <i class="fas fa-eye"></i> Details
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                                <button type="button" class="btn btn-sm @(item.IsActive ? "btn-secondary" : "btn-success") toggle-status" data-id="@item.Id">
+                                    <i class="fas @(item.IsActive ? "fa-ban" : "fa-check")"></i>
+                                    @(item.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.toggle-status').click(function() {
+                var button = $(this);
+                var id = button.data('id');
+                
+                $.ajax({
+                    url: '@Url.Action("ToggleStatus", "Cupon")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while toggling status');
+                    }
+                });
+            });
+        });
+    </script>
+}

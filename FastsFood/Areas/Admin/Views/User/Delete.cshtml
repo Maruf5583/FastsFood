@@ -1,0 +1,51 @@
+﻿@model FastsFood.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Delete User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-danger">Delete User</h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <h5>Are you sure you want to delete this user?</h5>
+                <p>This action cannot be undone.</p>
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Role</dt>
+                <dd class="col-sm-9">@ViewBag.UserRole</dd>
+
+                <dt class="col-sm-3">City</dt>
+                <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.City) ? "N/A" : Model.City)</dd>
+
+                <dt class="col-sm-3">Address</dt>
+                <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Address) ? "N/A" : Model.Address)</dd>
+
+                <dt class="col-sm-3">Postal Code</dt>
+                <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.PostalCode) ? "N/A" : Model.PostalCode)</dd>
+
+               
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Confirm Delete
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

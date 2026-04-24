@@ -1,0 +1,89 @@
+﻿@model FastsFood.Models.Item
+
+@{
+    ViewData["Title"] = "Item Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Item Details</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded" style="max-width: 300px; max-height: 300px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light rounded p-5">No Image Available</div>
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-3">
+                            @Html.DisplayNameFor(model => model.Title)
+                        </dt>
+                        <dd class="col-sm-9">
+                            @Html.DisplayFor(model => model.Title)
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            @Html.DisplayNameFor(model => model.Description)
+                        </dt>
+                        <dd class="col-sm-9">
+                            @Html.DisplayFor(model => model.Description)
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            Category
+                        </dt>
+                        <dd class="col-sm-9">
+                            @Model.Category?.Title
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            Sub Category
+                        </dt>
+                        <dd class="col-sm-9">
+                            @Model.SubCategory?.Title
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            @Html.DisplayNameFor(model => model.Price)
+                        </dt>
+                        <dd class="col-sm-9">
+                            @Model.Price.ToString("C")
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            Image URL
+                        </dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <a href="@Model.ImageUrl" target="_blank">@Model.ImageUrl</a>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="mt-3">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,113 @@
+﻿@model FastsFood.Models.Cupon
+
+@{
+    ViewData["Title"] = "Delete Cupon";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3 class="card-title">Delete Cupon</h3>
+            <div class="card-tools">
+                <a asp-action="Index" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Warning!</strong> Are you sure you want to delete this cupon? This action cannot be undone.
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 40%">@Html.DisplayNameFor(model => model.Id)</th>
+                            <td>@Html.DisplayFor(model => model.Id)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Title)</th>
+                            <td>@Html.DisplayFor(model => model.Title)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Type)</th>
+                            <td>
+                                @if (Model.Type == CuponType.Percentage)
+                                {
+                                    <span class="badge badge-info">Percentage</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success">Amount</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Discount)</th>
+                            <td>
+                                @if (Model.Type == CuponType.Percentage)
+                                {
+                                    @Model.Discount.ToString("0")
+                                    <text>%</text>
+                                }
+                                else
+                                {
+                                    @Model.Discount.ToString("C")
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.MinimumAmount)</th>
+                            <td>@Model.MinimumAmount.ToString("C")</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.IsActive)</th>
+                            <td>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge badge-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Inactive</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    @if (ViewBag.ImageBase64 != null)
+                    {
+                        <div class="text-center">
+                            <h5>Cupon Image</h5>
+                            <img src="data:image/*;base64,@ViewBag.ImageBase64"
+                                 alt="Cupon Image"
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; padding: 5px;" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-image fa-5x"></i>
+                            <p>No image uploaded</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Confirm Delete
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

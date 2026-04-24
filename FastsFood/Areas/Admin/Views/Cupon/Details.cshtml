@@ -1,0 +1,163 @@
+﻿@model FastsFood.Models.Cupon
+
+@{
+    ViewData["Title"] = "Cupon Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h3 class="card-title">Cupon Details</h3>
+            <div class="card-tools">
+                <a asp-action="Index" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th style="width: 40%">@Html.DisplayNameFor(model => model.Id)</th>
+                            <td>@Html.DisplayFor(model => model.Id)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Title)</th>
+                            <td>@Html.DisplayFor(model => model.Title)</td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Type)</th>
+                            <td>
+                                @if (Model.Type == CuponType.Percentage)
+                                {
+                                    <span class="badge badge-info">Percentage Discount</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success">Fixed Amount Discount</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Discount)</th>
+                            <td>
+                                <h4>
+                                    @if (Model.Type == CuponType.Percentage)
+                                    {
+                                        <span class="badge badge-primary">@Model.Discount.ToString("0")% OFF</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-primary">@Model.Discount.ToString("C") OFF</span>
+                                    }
+                                </h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.MinimumAmount)</th>
+                            <td>
+                                <strong>@Model.MinimumAmount.ToString("C")</strong>
+                                <small class="text-muted"> (Minimum order amount required)</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.IsActive)</th>
+                            <td>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge badge-success">Active</span>
+                                    <small class="text-muted"> - This cupon is available for customers</small>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Inactive</span>
+                                    <small class="text-muted"> - This cupon is currently disabled</small>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created Date</th>
+                            <td>@DateTime.Now.ToString("MMMM dd, yyyy hh:mm tt")</td>
+                        </tr>
+                    </table>
+
+                    <div class="mt-3">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">Cupon Image</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            @if (ViewBag.ImageBase64 != null)
+                            {
+                                <img src="data:image/*;base64,@ViewBag.ImageBase64"
+                                     alt="Cupon Image"
+                                     class="img-fluid"
+                                     style="max-height: 300px; border: 1px solid #ddd; padding: 5px;" />
+                                <br />
+                                <small class="text-muted">Click image to enlarge</small>
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-5">
+                                    <i class="fas fa-image fa-5x mb-3"></i>
+                                    <p>No image uploaded for this cupon</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">Cupon Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <strong>How to use:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Customer must have minimum order of <strong>@Model.MinimumAmount.ToString("C")</strong></li>
+                                    <li>
+                                        @if (Model.Type == CuponType.Percentage)
+                                        {
+                                            <span>Get <strong>@Model.Discount.ToString("0")%</strong> discount on total order</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Get <strong>@Model.Discount.ToString("C")</strong> off on total order</span>
+                                        }
+                                    </li>
+                                    @if (!Model.IsActive)
+                                    {
+                                        <li class="text-danger">⚠️ Currently inactive - customers cannot use this cupon</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Image click to enlarge (optional)
+            $('img').click(function() {
+                var imgSrc = $(this).attr('src');
+                window.open(imgSrc, '_blank');
+            });
+        });
+    </script>
+}

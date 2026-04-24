@@ -1,0 +1,74 @@
+﻿@model FastsFood.Models.ApplicationUser
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">User Details</h6>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a asp-action="ResetPassword" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-key"></i> Reset Password
+                </a>
+                <a asp-action="Index" class="btn btn-primary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 30%">Full Name</th>
+                            <td>@Model.Name</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>@Model.Email</td>
+                        </tr>
+                        <tr>
+                            <th>Role</th>
+                            <td>
+                                @if (ViewBag.UserRole == "Admin")
+                                {
+                                    <span class="badge bg-danger">Admin</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info">User</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Phone Number</th>
+                            <td>@(string.IsNullOrEmpty(Model.PhoneNumber) ? "N/A" : Model.PhoneNumber)</td>
+                        </tr>
+                        <tr>
+                            <th>City</th>
+                            <td>@(string.IsNullOrEmpty(Model.City) ? "N/A" : Model.City)</td>
+                        </tr>
+                        <tr>
+                            <th>Postal Code</th>
+                            <td>@(string.IsNullOrEmpty(Model.PostalCode) ? "N/A" : Model.PostalCode)</td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td>@(string.IsNullOrEmpty(Model.Address) ? "N/A" : Model.Address)</td>
+                        </tr>
+                        
+                        <tr>
+                            <th>Email Confirmed</th>
+                            <td>@(Model.EmailConfirmed ? "Yes" : "No")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
