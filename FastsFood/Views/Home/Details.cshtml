@@ -1,0 +1,200 @@
+﻿@using FastsFood.ViewModel
+@model ItemDetailsViewModel
+@{
+    ViewData["Title"] = Model.Item.Title;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Menu")">Menu</a></li>
+            <li class="breadcrumb-item active">@Model.Item.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Item Image -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-img-top-wrapper">
+                    @if (!string.IsNullOrEmpty(Model.Item.ImageUrl))
+                    {
+                        <img src="@Model.Item.ImageUrl" class="img-fluid rounded" alt="@Model.Item.Title" style="width: 100%; height: 400px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/600x400?text=Food+Item" class="img-fluid rounded" alt="@Model.Item.Title" style="width: 100%; height: 400px; object-fit: cover;">
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Details -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2">@Model.Item.Category?.Title</span>
+                        <span class="badge bg-info">@Model.Item.SubCategory?.Title</span>
+                    </div>
+                    
+                    <h1 class="display-5 fw-bold mb-3">@Model.Item.Title</h1>
+                    
+                    <p class="lead text-muted">@Model.Item.Description</p>
+                    
+                    <div class="price-section mb-4">
+                        <h2 class="text-primary">৳@Model.Item.Price.ToString("0.00")</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Quantity</label>
+                        <div class="input-group" style="width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decrementQuantity()">-</button>
+                            <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="99">
+                            <button class="btn btn-outline-secondary" type="button" onclick="incrementQuantity()">+</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <button onclick="addToCart(@Model.Item.Id)" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="/Identity/Account/Login" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="fas fa-sign-in-alt"></i> Login to Order
+                            </a>
+                        }
+                        <button onclick="addToWishlist(@Model.Item.Id)" class="btn btn-outline-danger btn-lg">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="delivery-info">
+                        <h5>Delivery Information:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-primary me-2"></i> Delivery time: 30-45 minutes</li>
+                            <li><i class="fas fa-truck text-primary me-2"></i> Free delivery on orders above ৳1000</li>
+                            <li><i class="fas fa-shield-alt text-primary me-2"></i> Cash on delivery available</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Items -->
+    @if (Model.RelatedItems.Any())
+    {
+        <div class="related-items mt-5">
+            <h3 class="mb-4">You May Also Like</h3>
+            <div class="row g-4">
+                @foreach (var item in Model.RelatedItems)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-img-top-wrapper" style="height: 150px;">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Title" style="height: 150px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <img src="https://via.placeholder.com/300x150?text=Food" class="card-img-top" alt="@item.Title" style="height: 150px; object-fit: cover;">
+                                }
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title">@item.Title</h6>
+                                <div class="price-tag">৳@item.Price.ToString("0.00")</div>
+                                <a href="@Url.Action("Details", new { id = item.Id })" class="btn btn-sm btn-primary mt-2 w-100">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .card-img-top-wrapper {
+        overflow: hidden;
+    }
+    
+    .price-section h2 {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    .price-tag {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+</style>
+
+<script>
+    function incrementQuantity() {
+        var input = document.getElementById('quantity');
+        var value = parseInt(input.value);
+        if (value < 99) {
+            input.value = value + 1;
+        }
+    }
+    
+    function decrementQuantity() {
+        var input = document.getElementById('quantity');
+        var value = parseInt(input.value);
+        if (value > 1) {
+            input.value = value - 1;
+        }
+    }
+    
+    function addToCart(itemId) {
+        var quantity = document.getElementById('quantity').value;
+        
+        $.post('/Cart/AddToCart', { itemId: itemId, quantity: quantity }, function(response) {
+            if (response.success) {
+                showToast('Item added to cart successfully!', 'success');
+                updateCartCount();
+            } else {
+                showToast(response.message || 'Error adding to cart', 'error');
+            }
+        }).fail(function() {
+            showToast('Please login to add items to cart', 'warning');
+            setTimeout(function() {
+                window.location.href = '/Identity/Account/Login';
+            }, 2000);
+        });
+    }
+    
+    function addToWishlist(itemId) {
+        $.post('/Wishlist/AddToWishlist', { itemId: itemId }, function(response) {
+            if (response.success) {
+                showToast('Item added to wishlist!', 'success');
+            } else {
+                showToast('Please login to add to wishlist', 'warning');
+            }
+        });
+    }
+    
+    function showToast(message, type) {
+        // Implement toast notification
+        alert(message);
+    }
+    
+    function updateCartCount() {
+        $.get('/Cart/GetCartCount', function(count) {
+            $('#cartCount').text(count);
+        });
+    }
+</script>

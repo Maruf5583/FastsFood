@@ -1,8 +1,808 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using FastsFood.ViewModel
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Home - FastFood";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    /* Global Reset */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Hero Section - Fixed */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0;
+        position: relative;
+        margin-top: 0;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: white;
+        margin-bottom: 20px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .btn-hero-primary {
+        background: white;
+        color: #667eea;
+        padding: 12px 35px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        border: none;
+        margin-right: 15px;
+    }
+    
+    .btn-hero-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        color: #667eea;
+    }
+    
+    .btn-hero-outline {
+        background: transparent;
+        color: white;
+        padding: 12px 35px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        border: 2px solid white;
+    }
+    
+    .btn-hero-outline:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-3px);
+    }
+    
+    /* Hero Stats */
+    .hero-stats {
+        display: flex;
+        gap: 40px;
+        margin-top: 40px;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-item i {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+    
+    .stat-item p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.9);
+    }
+    
+    /* Hero Image */
+    .hero-img {
+        width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    /* Category Cards */
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #2c3e50;
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        margin-bottom: 50px;
+    }
+    
+    .category-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(102,126,234,0.2);
+    }
+    
+    .category-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea15, #764ba215);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .category-card:hover .category-icon {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    .category-card:hover .category-icon i {
+        color: white !important;
+    }
+    
+    .category-icon i {
+        font-size: 2.5rem;
+        color: #667eea;
+    }
+    
+    .category-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .category-count {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    /* Food Cards */
+    .food-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+    
+    .food-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .food-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .food-body {
+        padding: 20px;
+    }
+    
+    .food-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+    }
+    
+    .food-desc {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+    
+    .food-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .btn-order {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-order:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 10px rgba(102,126,234,0.3);
+    }
+    
+    /* Offer Banner */
+    /* Modern Offer Banner */
+    .offer-banner-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    
+    .offer-bg-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="80" r="3" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="70" r="4" fill="rgba(255,255,255,0.05)"/></svg>');
+        background-repeat: repeat;
+        opacity: 0.3;
+    }
+    
+    .offer-content {
+        position: relative;
+        z-index: 2;
+        padding: 50px;
+    }
+    
+    .offer-badge {
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        display: inline-block;
+        margin-bottom: 20px;
+        color: white;
+    }
+    
+    .offer-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 15px;
+    }
+    
+    .offer-description {
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 30px;
+    }
+    
+    .offer-discount {
+        background: #ff4757;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    
+    /* Offer Items Preview */
+    .offer-items-preview {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .offer-item {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 10px;
+        text-align: center;
+        width: 100px;
+        transition: all 0.3s ease;
+    }
+    
+    .offer-item:hover {
+        transform: translateY(-5px);
+        background: rgba(255,255,255,0.25);
+    }
+    
+    .offer-item img {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        margin-bottom: 8px;
+    }
+    
+    .offer-item-info h6 {
+        font-size: 0.75rem;
+        color: white;
+        margin-bottom: 5px;
+    }
+    
+    .old-price {
+        font-size: 0.7rem;
+        text-decoration: line-through;
+        color: rgba(255,255,255,0.6);
+        margin-right: 5px;
+    }
+    
+    .new-price {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #ffd700;
+    }
+    
+    /* Offer Code Box */
+    .offer-code-box {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    
+    .offer-code-box i {
+        font-size: 2rem;
+        color: #ffd700;
+        margin-bottom: 10px;
+    }
+    
+    .offer-code-box span {
+        display: block;
+        color: white;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .offer-code {
+        background: white;
+        color: #667eea;
+        font-size: 1.5rem;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 15px;
+        letter-spacing: 2px;
+        margin: 15px 0;
+        display: inline-block;
+    }
+    
+    .btn-copy-code {
+        background: #ffd700;
+        color: #333;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-copy-code:hover {
+        background: #ffed4a;
+        transform: scale(1.05);
+    }
+    
+    /* Timer */
+    .offer-timer {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .offer-timer h6 {
+        color: white;
+        margin-bottom: 10px;
+    }
+    
+    .timer-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .timer-item {
+        background: rgba(0,0,0,0.3);
+        border-radius: 15px;
+        padding: 12px 15px;
+        min-width: 70px;
+        text-align: center;
+    }
+    
+    .timer-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        display: block;
+        line-height: 1;
+    }
+    
+    .timer-label {
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.7);
+    }
+    
+    .timer-sep {
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+    }
+    
+    /* Offer Button */
+    .offer-btn {
+        background: white;
+        color: #667eea;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .offer-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        color: #667eea;
+    }
+    
+    /* Responsive */
+    media (max-width: 768px) {
+        .offer-content {
+            padding: 30px;
+        }
+        
+        .offer-title {
+            font-size: 1.8rem;
+        }
+        
+        .offer-items-preview {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .timer-box {
+            gap: 5px;
+        }
+        
+        .timer-item {
+            min-width: 50px;
+            padding: 8px 10px;
+        }
+        
+        .timer-number {
+            font-size: 1.2rem;
+        }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-stats {
+            gap: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+        }
+        
+        .offer-banner {
+            padding: 30px;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">
+                    Delicious Food<br>
+                    Delivered To Your Door
+                </h1>
+                <p class="hero-subtitle">
+                    Craving something delicious? Order from our wide variety of food items and get it delivered fast. 
+                    Fresh ingredients, great taste!
+                </p>
+                <div>
+                    <a href="/Home/Menu" class="btn-hero-primary">
+                        <i class="fas fa-shopping-cart me-2"></i>Order Now
+                    </a>
+                    <a href="/Home/Menu" class="btn-hero-outline">
+                        <i class="fas fa-eye me-2"></i>View Menu
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <p>500+ Reviews</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-truck"></i>
+                        <p>Free Delivery</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <p>30 Min Delivery</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="/images/items/cover.jpg" alt="Delicious Food" class="hero-img" 
+                     onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<div class="container my-5">
+    <h2 class="section-title">Shop by Category</h2>
+    <p class="section-subtitle">Browse our delicious categories</p>
+    
+    @if (Model.Categories != null && Model.Categories.Any())
+    {
+        <div class="row g-4">
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <a href="/Home/Menu?categoryId=@category.Id" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3 class="category-title">@category.Title</h3>
+                        <p class="category-count">@(category.SubCategories?.Count ?? 0) Items</p>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+            <h4>No Categories Yet</h4>
+            <p>Please login as Admin to add categories.</p>
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <a href="/Admin/Category/Create" class="btn btn-primary mt-3">Add Category</a>
+            }
+        </div>
+    }
 </div>
+
+<!-- Popular Items Section -->
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">
+            <i class="fas fa-fire me-2"></i>Popular Now
+        </span>
+    </div>
+    <h2 class="section-title">Most Loved Dishes</h2>
+    <p class="section-subtitle">Our customers' all-time favorite items</p>
+    
+    @if (Model.PopularItems != null && Model.PopularItems.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.PopularItems)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <div class="food-card">
+                        <img src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "/images/items/cover.jpg")" 
+                             class="food-img" alt="@item.Title"
+                             onerror="this.src='/images/items/cover.jpg'">
+                        <div class="food-body">
+                            <h3 class="food-title">@item.Title</h3>
+                            <p class="food-desc">@(item.Description?.Length > 60 ? item.Description.Substring(0, 60) + "..." : item.Description ?? "Delicious food item")</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="food-price">৳@item.Price.ToString("0.00")</span>
+                                <a href="/Home/Details/@item.Id" class="btn-order">
+                                    <i class="fas fa-shopping-cart me-1"></i>Order
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="text-center mt-5">
+            <a href="/Home/Menu" class="btn-hero-primary" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                View All Items <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-hamburger fa-3x text-muted mb-3"></i>
+            <h4>No Items Available</h4>
+            <p>Please login as Admin to add food items.</p>
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <a href="/Admin/Item/Create" class="btn btn-primary mt-3">Add Item</a>
+            }
+        </div>
+    }
+</div>
+
+<!-- Today's Special Offer -->
+@if (Model.TodaySpecial != null && Model.TodaySpecial.Any())
+{
+    <div class="container my-5 py-4">
+        <div class="offer-banner-modern">
+            <div class="offer-bg-pattern"></div>
+            <div class="offer-content">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <span class="offer-badge">
+                            <i class="fas fa-fire"></i> LIMITED TIME OFFER
+                        </span>                        <h2 class="offer-title">Today's Special Offer!</h2>
+                        <p class="offer-description">Get <span class="offer-discount">20% OFF</span> on selected items</p>
+                        
+                        <div class="offer-items-preview">
+                            @foreach (var item in Model.TodaySpecial.Take(3))
+                            {
+                                <div class="offer-item">
+                                    <img src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "/images/items/cover.jpg")" 
+                                         alt="@item.Title"
+                                         onerror="this.src='/images/items/cover.jpg'">
+                                    <div class="offer-item-info">
+                                        <h6>@item.Title</h6>
+                                        <div>
+                                            <span class="old-price">৳@((item.Price + 100).ToString("0.00"))</span>
+                                            <span class="new-price">৳@item.Price.ToString("0.00")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-lg-5 text-center">
+                        <div class="offer-code-box">
+                            <i class="fas fa-tag"></i>
+                            <span>Use Code</span>
+                            <div class="offer-code">FASTFOOD20</div>
+                            <button class="btn-copy-code" onclick="copyCode()">
+                                <i class="fas fa-copy"></i> Copy Code
+                            </button>
+                        </div>
+                        
+                        <div class="offer-timer">
+                            <h6>Offer ends in:</h6>
+                            <div class="timer-box">
+                                <div class="timer-item">
+                                    <span class="timer-number" id="hours">24</span>
+                                    <span class="timer-label">Hours</span>
+                                </div>
+                                <span class="timer-sep">:</span>
+                                <div class="timer-item">
+                                    <span class="timer-number" id="minutes">00</span>
+                                    <span class="timer-label">Mins</span>
+                                </div>
+                                <span class="timer-sep">:</span>
+                                <div class="timer-item">
+                                    <span class="timer-number" id="seconds">00</span>
+                                    <span class="timer-label">Secs</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="/Home/Menu" class="offer-btn">
+                            Order Now <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Features Section -->
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="text-center p-4">
+                <i class="fas fa-truck fa-3x text-primary mb-3"></i>
+                <h5 class="fw-bold">Fast Delivery</h5>
+                <p class="text-muted">30-45 minute delivery to your doorstep</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center p-4">
+                <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                <h5 class="fw-bold">Quality Food</h5>
+                <p class="text-muted">Fresh ingredients and hygienic preparation</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center p-4">
+                <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                <h5 class="fw-bold">24/7 Support</h5>
+                <p class="text-muted">We're here to help you anytime</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+                <script>
+    // Countdown Timer
+    function startCountdown() {
+        // Set end time to 24 hours from now
+        const endTime = new Date();
+        endTime.setHours(endTime.getHours() + 24);
+        
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+            
+            if (distance < 0) {
+                clearInterval(timer);
+                document.getElementById('hours').innerHTML = '00';
+                document.getElementById('minutes').innerHTML = '00';
+                document.getElementById('seconds').innerHTML = '00';
+                return;
+            }
+            
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('hours').innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').innerHTML = seconds.toString().padStart(2, '0');
+        }, 1000);
+    }
+    
+    // Copy Code Function
+    function copyCode() {
+        const code = document.querySelector('.offer-code').innerText;
+        navigator.clipboard.writeText(code).then(function() {
+            const btn = document.querySelector('.btn-copy-code');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(function() {
+                btn.innerHTML = originalText;
+            }, 2000);
+        });
+    }
+    
+    // Start countdown when page loads
+    document.addEventListener('DOMContentLoaded', startCountdown);
+</script>
