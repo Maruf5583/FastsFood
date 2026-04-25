@@ -1,0 +1,167 @@
+﻿@model FastsFood.Models.OrderHeader
+@{
+    ViewData["Title"] = "Track Order";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Track Your Order #ORD-@Model.Id.ToString("D6")</h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Order Status Timeline -->
+                    <div class="order-timeline">
+                        <div class="timeline-step @(GetStatusClass(Model.OrderStatus, "Pending"))">
+                            <div class="timeline-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6>Order Placed</h6>
+                                <small>@Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-step @(GetStatusClass(Model.OrderStatus, "Confirmed"))">
+                            <div class="timeline-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6>Order Confirmed</h6>
+                                <small>Order has been confirmed</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-step @(GetStatusClass(Model.OrderStatus, "Processing"))">
+                            <div class="timeline-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6>Preparing Food</h6>
+                                <small>Your food is being prepared</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-step @(GetStatusClass(Model.OrderStatus, "OnTheWay"))">
+                            <div class="timeline-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6>On The Way</h6>
+                                <small>Rider is on the way</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-step @(GetStatusClass(Model.OrderStatus, "Delivered"))">
+                            <div class="timeline-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6>Delivered</h6>
+                                <small>Order delivered successfully</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4 text-center">
+                        <i class="fas fa-info-circle"></i>
+                        Current Status: <strong>@Model.OrderStatus</strong>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="/Order/MyOrders" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline-step {
+        display: flex;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 30px;
+        bottom: -30px;
+        width: 2px;
+        background: #ddd;
+    }
+    
+    .timeline-step:last-child::before {
+        display: none;
+    }
+    
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        background: #e0e0e0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .timeline-step.completed .timeline-icon {
+        background: #28a745;
+        color: white;
+    }
+    
+    .timeline-step.active .timeline-icon {
+        background: #007bff;
+        color: white;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .timeline-content {
+        flex: 1;
+    }
+    
+    .timeline-content h6 {
+        margin-bottom: 5px;
+    }
+    
+    .timeline-step.completed .timeline-content h6 {
+        color: #28a745;
+    }
+    
+    .timeline-step.active .timeline-content h6 {
+        color: #007bff;
+        font-weight: bold;
+    }
+</style>
+
+@functions {
+    string GetStatusClass(string currentStatus, string stepStatus)
+    {
+        var statusOrder = new[] { "Pending", "Confirmed", "Processing", "OnTheWay", "Delivered" };
+        int currentIndex = Array.IndexOf(statusOrder, currentStatus);
+        int stepIndex = Array.IndexOf(statusOrder, stepStatus);
+        
+        if (stepIndex < currentIndex) return "completed";
+        if (stepIndex == currentIndex) return "active";
+        return "";
+    }
+}

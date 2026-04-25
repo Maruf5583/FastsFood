@@ -1,0 +1,678 @@
+﻿@model FastsFood.ViewModel.CheckoutVm
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+@* Anti-forgery token for AJAX *@
+@Html.AntiForgeryToken()
+
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --brand:     #ff6b35;
+        --brand-dk:  #e85520;
+        --brand-lt:  #fff3ee;
+        --dark:      #1a1a2e;
+        --mid:       #444462;
+        --soft:      #f7f7fb;
+        --border:    #e8e8f0;
+        --success:   #22c55e;
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --shadow-sm: 0 2px 12px rgba(0,0,0,.06);
+        --shadow-md: 0 8px 32px rgba(0,0,0,.10);
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--soft); }
+
+    /* ── Page header ── */
+    .co-hero {
+        background: linear-gradient(135deg, var(--dark) 0%, #16213e 100%);
+        padding: 48px 0 80px;
+        position: relative;
+        overflow: hidden;
+    }
+    .co-hero::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(255,107,53,.18), transparent);
+    }
+    .co-hero h1 {
+        font-family: 'Sora', sans-serif;
+        font-size: 2.2rem; font-weight: 700;
+        color: #fff; margin: 0;
+    }
+    .co-hero p { color: rgba(255,255,255,.55); margin: 6px 0 0; font-size: .95rem; }
+    .co-hero .step-bar {
+        display: flex; align-items: center; gap: 0;
+        margin-top: 28px;
+    }
+    .step-bar .step {
+        display: flex; align-items: center; gap: 8px;
+        font-size: .8rem; color: rgba(255,255,255,.45);
+        font-family: 'Sora', sans-serif;
+    }
+    .step-bar .step.active { color: var(--brand); }
+    .step-bar .step.done   { color: var(--success); }
+    .step-bar .step .dot {
+        width: 28px; height: 28px; border-radius: 50%;
+        border: 2px solid currentColor;
+        display: grid; place-items: center;
+        font-size: .75rem; font-weight: 600;
+    }
+    .step-bar .step.active .dot { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .step-bar .step.done   .dot { background: var(--success); border-color: var(--success); color: #fff; }
+    .step-bar .line { flex: 1; height: 1px; background: rgba(255,255,255,.15); max-width: 60px; }
+
+    /* ── Main layout ── */
+    .co-body { margin-top: -48px; }
+
+    /* ── Cards ── */
+    .co-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+    .co-card-head {
+        padding: 22px 28px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; gap: 12px;
+    }
+    .co-card-head .icon {
+        width: 38px; height: 38px; border-radius: 10px;
+        background: var(--brand-lt);
+        display: grid; place-items: center;
+        color: var(--brand); font-size: 1rem;
+    }
+    .co-card-head h5 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1rem; font-weight: 600;
+        color: var(--dark); margin: 0;
+    }
+    .co-card-body { padding: 24px 28px; }
+
+    /* ── Form elements ── */
+    .form-label {
+        font-size: .82rem; font-weight: 500;
+        color: var(--mid); letter-spacing: .02em;
+        text-transform: uppercase; margin-bottom: 6px;
+    }
+    .form-control, .form-select {
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 11px 14px;
+        font-size: .9rem; color: var(--dark);
+        background: var(--soft);
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(255,107,53,.12);
+        background: #fff; outline: none;
+    }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+
+    /* ── Payment options ── */
+    .pay-option { position: relative; margin-bottom: 10px; }
+    .pay-option input[type=radio] { position: absolute; opacity: 0; }
+    .pay-label {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+    }
+    .pay-option input:checked ~ .pay-label {
+        border-color: var(--brand);
+        background: var(--brand-lt);
+    }
+    .pay-icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        display: grid; place-items: center;
+        font-size: 1.2rem; flex-shrink: 0;
+    }
+    .pay-icon.ssl  { background: #e8f0ff; color: #3b5bdb; }
+    .pay-icon.fake { background: #fff8e1; color: #f59f00; }
+    .pay-icon.cod  { background: #e8faf0; color: #2f9e44; }
+    .pay-info strong { display: block; font-size: .9rem; color: var(--dark); }
+    .pay-info span   { font-size: .78rem; color: var(--mid); }
+    .pay-check {
+        margin-left: auto; width: 20px; height: 20px;
+        border-radius: 50%; border: 2px solid var(--border);
+        display: grid; place-items: center; flex-shrink: 0;
+        transition: all .2s;
+    }
+    .pay-option input:checked ~ .pay-label .pay-check {
+        background: var(--brand); border-color: var(--brand);
+    }
+    .pay-option input:checked ~ .pay-label .pay-check::after {
+        content: ''; width: 8px; height: 8px;
+        border-radius: 50%; background: #fff;
+    }
+
+    /* ── Order summary ── */
+    .order-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .order-item:last-child { border-bottom: none; }
+    .order-item img {
+        width: 52px; height: 52px;
+        object-fit: cover; border-radius: 10px;
+        flex-shrink: 0;
+    }
+    .order-item .name { font-size: .88rem; font-weight: 500; color: var(--dark); }
+    .order-item .qty  { font-size: .78rem; color: var(--mid); }
+    .order-item .price {
+        margin-left: auto; font-size: .9rem;
+        font-weight: 600; color: var(--brand);
+        white-space: nowrap;
+    }
+
+    /* ── Totals ── */
+    .total-row {
+        display: flex; justify-content: space-between;
+        align-items: center; padding: 6px 0;
+        font-size: .88rem; color: var(--mid);
+    }
+    .total-row.grand {
+        padding: 14px 0 0; margin-top: 6px;
+        border-top: 2px dashed var(--border);
+        font-family: 'Sora', sans-serif;
+        font-size: 1.1rem; font-weight: 700; color: var(--dark);
+    }
+    .total-row.grand .amount { color: var(--brand); }
+    .total-row .disc { color: var(--success); }
+
+    /* ── CTA button ── */
+    #placeOrderBtn {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        width: 100%; padding: 15px;
+        background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dk) 100%);
+        border: none; border-radius: var(--radius-md);
+        font-family: 'Sora', sans-serif;
+        font-size: 1rem; font-weight: 600; color: #fff;
+        cursor: pointer; letter-spacing: .02em;
+        transition: transform .15s, box-shadow .15s, opacity .2s;
+        box-shadow: 0 4px 20px rgba(255,107,53,.4);
+        margin-top: 20px;
+    }
+    #placeOrderBtn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(255,107,53,.5);
+    }
+    #placeOrderBtn:disabled { opacity: .7; cursor: not-allowed; transform: none; }
+
+    .btn-back {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; padding: 12px;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: .88rem; color: var(--mid);
+        text-decoration: none; margin-top: 10px;
+        transition: border-color .2s, color .2s;
+    }
+    .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+
+    /* ── Accept bar ── */
+    .accept-bar {
+        background: #fff; border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        padding: 14px 20px;
+        display: flex; align-items: center;
+        justify-content: space-between;
+        margin-top: 14px;
+        flex-wrap: wrap; gap: 10px;
+    }
+    .accept-bar span { font-size: .75rem; color: var(--mid); }
+    .accept-bar .logos { display: flex; align-items: center; gap: 10px; }
+    .accept-bar .logos img { height: 22px; object-fit: contain; }
+    .accept-bar .logos i  { font-size: 1.4rem; }
+
+    /* ── Security badge ── */
+    .secure-badge {
+        display: flex; align-items: center; gap: 6px;
+        font-size: .75rem; color: var(--success);
+        margin-top: 10px; justify-content: center;
+    }
+
+    /* ── Toast ── */
+    #co-toast {
+        position: fixed; bottom: 24px; left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: var(--dark); color: #fff;
+        padding: 12px 22px; border-radius: 50px;
+        font-size: .85rem; z-index: 9999;
+        box-shadow: var(--shadow-md);
+        transition: transform .3s ease;
+        white-space: nowrap;
+    }
+    #co-toast.show { transform: translateX(-50%) translateY(0); }
+    #co-toast.error { background: #dc2626; }
+
+    /* ── Spinner ── */
+    .spinner-sm {
+        width: 18px; height: 18px;
+        border: 2px solid rgba(255,255,255,.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin .6s linear infinite;
+        display: inline-block;
+    }
+    keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Skeleton ── */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f5 25%, #e8e8f0 50%, #f0f0f5 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+        border-radius: 8px; height: 60px; margin-bottom: 10px;
+    }
+    keyframes shimmer { to { background-position: -200% 0; } }
+
+    media (max-width: 768px) {
+        .co-hero { padding: 32px 0 64px; }
+        .co-hero h1 { font-size: 1.6rem; }
+        .co-card-body { padding: 18px; }
+    }
+</style>
+
+<!-- ══ Hero ══════════════════════════════════════════════════════════ -->
+<div class="co-hero">
+    <div class="container">
+        <h1>🛒 Checkout</h1>
+        <p>Just a few steps away from your delicious meal</p>
+        <div class="step-bar">
+            <div class="step done">
+                <div class="dot"><i class="fas fa-check" style="font-size:.6rem"></i></div>
+                <span>Cart</span>
+            </div>
+            <div class="line"></div>
+            <div class="step active">
+                <div class="dot">2</div>
+                <span>Details</span>
+            </div>
+            <div class="line"></div>
+            <div class="step">
+                <div class="dot">3</div>
+                <span>Payment</span>
+            </div>
+            <div class="line"></div>
+            <div class="step">
+                <div class="dot">4</div>
+                <span>Confirm</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Body ══════════════════════════════════════════════════════════ -->
+<div class="co-body pb-5">
+    <div class="container">
+
+        @* Hidden CSRF token used by AJAX *@
+        <input type="hidden" id="__AntiForgeryToken" value="@Html.AntiForgeryToken()" />
+
+        <div class="row g-4">
+
+            <!-- ── Left: Delivery + Payment ──────────────────────────── -->
+            <div class="col-lg-7">
+
+                <!-- Delivery Info -->
+                <div class="co-card mb-4">
+                    <div class="co-card-head">
+                        <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <h5>Delivery Information</h5>
+                    </div>
+                    <div class="co-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name *</label>
+                                <input id="Name" type="text" class="form-control"
+                                       placeholder="Enter your full name"
+                                       value="@Model.Name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone Number *</label>
+                                <input id="PhoneNumber" type="tel" class="form-control"
+                                       placeholder="01XXXXXXXXX"
+                                       value="@Model.PhoneNumber" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email Address *</label>
+                                <input id="Email" type="email" class="form-control"
+                                       placeholder="you@example.com"
+                                       value="@Model.Email" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Delivery Address *</label>
+                                <textarea id="DeliveryAddress" class="form-control"
+                                          placeholder="House, Road, Area…">@Model.DeliveryAddress</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City *</label>
+                                <input id="City" type="text" class="form-control"
+                                       placeholder="Dhaka"
+                                       value="@Model.City" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Postal Code</label>
+                                <input id="PostalCode" type="text" class="form-control"
+                                       placeholder="1200" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Delivery Note <span style="font-weight:300;text-transform:none">(optional)</span></label>
+                                <textarea id="DeliveryNote" class="form-control" rows="2"
+                                          placeholder="Ring bell twice, leave at door, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="co-card">
+                    <div class="co-card-head">
+                        <div class="icon"><i class="fas fa-wallet"></i></div>
+                        <h5>Payment Method</h5>
+                    </div>
+                    <div class="co-card-body">
+
+                        <div class="pay-option">
+                            <input type="radio" name="PaymentMethod" id="pm-ssl" value="SSLCommerz" checked>
+                            <label class="pay-label" for="pm-ssl">
+                                <div class="pay-icon ssl"><i class="fas fa-credit-card"></i></div>
+                                <div class="pay-info">
+                                    <strong>SSLCommerz</strong>
+                                    <span>Visa, Mastercard, bKash, Nagad, Rocket…</span>
+                                </div>
+                                <div class="pay-check"></div>
+                            </label>
+                        </div>
+
+                        <div class="pay-option">
+                            <input type="radio" name="PaymentMethod" id="pm-fake" value="FakePayment">
+                            <label class="pay-label" for="pm-fake">
+                                <div class="pay-icon fake"><i class="fas fa-flask"></i></div>
+                                <div class="pay-info">
+                                    <strong>Test Payment</strong>
+                                    <span>Development only — no real charge</span>
+                                </div>
+                                <div class="pay-check"></div>
+                            </label>
+                        </div>
+
+                        <div class="pay-option">
+                            <input type="radio" name="PaymentMethod" id="pm-cod" value="CashOnDelivery">
+                            <label class="pay-label" for="pm-cod">
+                                <div class="pay-icon cod"><i class="fas fa-money-bill-wave"></i></div>
+                                <div class="pay-info">
+                                    <strong>Cash on Delivery</strong>
+                                    <span>Pay when your food arrives at your door</span>
+                                </div>
+                                <div class="pay-check"></div>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Right: Order Summary + CTA ────────────────────────── -->
+            <div class="col-lg-5">
+                <div style="position: sticky; top: 20px;">
+
+                    <div class="co-card">
+                        <div class="co-card-head">
+                            <div class="icon"><i class="fas fa-receipt"></i></div>
+                            <h5>Order Summary</h5>
+                        </div>
+                        <div class="co-card-body">
+
+                            <!-- Cart items -->
+                            <div id="cartItems">
+                                <div class="skeleton"></div>
+                                <div class="skeleton" style="height:50px;opacity:.6"></div>
+                            </div>
+
+                            <hr style="border-color:var(--border);margin:16px 0">
+
+                            <!-- Totals -->
+                            <div class="total-row">
+                                <span>Subtotal</span>
+                                <span>৳<span id="subtotal">@Model.SubTotal.ToString("0.00")</span></span>
+                            </div>
+                            <div class="total-row">
+                                <span>Delivery fee</span>
+                                <span>৳<span id="deliveryFee">@Model.DeliveryFee.ToString("0.00")</span></span>
+                            </div>
+                            <div class="total-row" id="discountRow" style="display:none">
+                                <span>Discount</span>
+                                <span class="disc">-৳<span id="discount">0</span></span>
+                            </div>
+                            <div class="total-row grand">
+                                <span>Total</span>
+                                <span class="amount">৳<span id="total">@Model.Total.ToString("0.00")</span></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Hidden values -->
+                    <input type="hidden" id="hSubTotal"   value="@Model.SubTotal" />
+                    <input type="hidden" id="hDeliveryFee" value="@Model.DeliveryFee" />
+                    <input type="hidden" id="hTotal"      value="@Model.Total" />
+                    <input type="hidden" id="hDiscount"   value="0" />
+                    <input type="hidden" id="hCouponCode" value="" />
+
+                    <!-- CTA -->
+                    <button id="placeOrderBtn">
+                        <i class="fas fa-check-circle"></i>
+                        Place Order
+                    </button>
+
+                    <a href="/Cart/Index" class="btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to Cart
+                    </a>
+
+                    <!-- Accept logos -->
+                    <div class="accept-bar">
+                        <span>We accept</span>
+                        <div class="logos">
+                            <i class="fab fa-cc-visa text-primary"></i>
+                            <i class="fab fa-cc-mastercard text-danger"></i>
+                            <img src="https://sandbox.sslcommerz.com/public/img/bkash.png" alt="bKash">
+                            <img src="https://sandbox.sslcommerz.com/public/img/nagad.png" alt="Nagad">
+                        </div>
+                    </div>
+
+                    <div class="secure-badge">
+                        <i class="fas fa-lock" style="font-size:.8rem"></i>
+                        Secured by 256-bit SSL encryption
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="co-toast"></div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────
+function showToast(msg, isError) {
+    var t = document.getElementById('co-toast');
+    t.textContent = msg;
+    t.className = isError ? 'error show' : 'show';
+    setTimeout(function () { t.className = ''; }, 3500);
+}
+
+function val(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+// ── Load cart items ───────────────────────────────────────────────────────
+function loadCartItems() {
+    $.get('/Cart/GetCartItems', function (items) {
+        var container = document.getElementById('cartItems');
+
+        if (!items || items.length === 0) {
+            container.innerHTML =
+                '<div style="text-align:center;padding:20px 0;color:var(--mid);font-size:.88rem">' +
+                '<i class="fas fa-shopping-cart" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>' +
+                'Your cart is empty.<br><a href="/Home/Menu" style="color:var(--brand)">Browse menu</a></div>';
+            return;
+        }
+
+        var html = '';
+        var subtotal = 0;
+
+        items.forEach(function (item) {
+            var lineTotal = item.price * item.quantity;
+            subtotal += lineTotal;
+            var img = item.imageUrl ? item.imageUrl : '/images/items/cover.jpg';
+            html +=
+                '<div class="order-item">' +
+                    '<img src="' + img + '" alt="' + item.title + '" onerror="this.src=\'/images/items/cover.jpg\'">' +
+                    '<div style="flex:1;min-width:0">' +
+                        '<div class="name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + item.title + '</div>' +
+                        '<div class="qty">৳' + item.price.toFixed(2) + ' × ' + item.quantity + '</div>' +
+                    '</div>' +
+                    '<div class="price">৳' + lineTotal.toFixed(2) + '</div>' +
+                '</div>';
+        });
+
+        container.innerHTML = html;
+
+        var deliveryFee = 60;
+        var discount    = parseFloat(document.getElementById('hDiscount').value) || 0;
+        var total       = subtotal + deliveryFee - discount;
+
+        document.getElementById('subtotal').textContent    = subtotal.toFixed(2);
+        document.getElementById('deliveryFee').textContent = deliveryFee.toFixed(2);
+        document.getElementById('total').textContent       = total.toFixed(2);
+
+        document.getElementById('hSubTotal').value    = subtotal.toFixed(2);
+        document.getElementById('hDeliveryFee').value = deliveryFee.toFixed(2);
+        document.getElementById('hTotal').value       = total.toFixed(2);
+
+        if (discount > 0) {
+            document.getElementById('discount').textContent = discount.toFixed(2);
+            document.getElementById('discountRow').style.display = '';
+        }
+    }).fail(function () {
+        document.getElementById('cartItems').innerHTML =
+            '<div style="color:#dc2626;font-size:.85rem;padding:12px 0">' +
+            '<i class="fas fa-exclamation-circle"></i> Error loading cart. Please refresh.</div>';
+    });
+}
+
+// ── Place Order ───────────────────────────────────────────────────────────
+function placeOrder() {
+    var name    = val('Name');
+    var phone   = val('PhoneNumber');
+    var email   = val('Email');
+    var address = val('DeliveryAddress');
+    var city    = val('City');
+
+    if (!name || !phone || !email || !address || !city) {
+        showToast('⚠ Please fill in all required fields.', true);
+        // Highlight empties
+        ['Name','PhoneNumber','Email','DeliveryAddress','City'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && !el.value.trim()) {
+                el.style.borderColor = '#dc2626';
+                el.addEventListener('input', function () {
+                    el.style.borderColor = '';
+                }, { once: true });
+            }
+        });
+        return;
+    }
+
+    // Basic email check
+   if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+        showToast('⚠ Please enter a valid email address.', true);
+        return;
+    }
+
+    var paymentMethod = document.querySelector('input[name="PaymentMethod"]:checked');
+    if (!paymentMethod) {
+        showToast('⚠ Please select a payment method.', true);
+        return;
+    }
+
+    var data = {
+        Name:            name,
+        PhoneNumber:     phone,
+        Email:           email,
+        DeliveryAddress: address,
+        City:            city,
+        PostalCode:      val('PostalCode'),
+        DeliveryNote:    val('DeliveryNote'),
+        PaymentMethod:   paymentMethod.value,
+        SubTotal:        parseFloat(document.getElementById('hSubTotal').value)    || 0,
+        DeliveryFee:     parseFloat(document.getElementById('hDeliveryFee').value) || 60,
+        Discount:        parseFloat(document.getElementById('hDiscount').value)    || 0,
+        Total:           parseFloat(document.getElementById('hTotal').value)       || 0,
+        CouponCode:      document.getElementById('hCouponCode').value || ''
+    };
+
+    var btn = document.getElementById('placeOrderBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-sm"></span> Processing...';
+
+    // Get CSRF token — try multiple sources
+    var token = document.querySelector('input[name="__RequestVerificationToken"]');
+    var tokenValue = token ? token.value : '';
+
+    $.ajax({
+        url:         '/Order/Checkout',
+        type:        'POST',
+        contentType: 'application/json',
+        data:        JSON.stringify(data),
+        headers:     { 'RequestVerificationToken': tokenValue },
+        success: function (res) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
+
+            if (res && res.success === false) {
+                showToast('❌ ' + (res.message || 'Something went wrong.'), true);
+                return;
+            }
+
+            if (res && res.redirectUrl) {
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Redirecting…';
+                showToast('✅ Order placed! Redirecting…', false);
+                setTimeout(function () {
+                    window.location.href = res.redirectUrl;
+                }, 600);
+            }
+        },
+        error: function (xhr) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
+            var msg = (xhr.responseJSON && xhr.responseJSON.message)
+                ? xhr.responseJSON.message
+                : 'Server error. Please try again.';
+            showToast('❌ ' + msg, true);
+        }
+    });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+$(document).ready(function () {
+    loadCartItems();
+    document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
+});
+</script>
+}

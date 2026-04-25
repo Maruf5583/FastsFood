@@ -1,0 +1,96 @@
+﻿@model FastsFood.ViewModel.OrderConfirmationVm
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <i class="fas fa-check-circle fa-4x mb-2"></i>
+                    <h2 class="mb-0">Order Confirmed!</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h4>Thank you for your order!</h4>
+                        <p class="text-muted">Your order has been placed successfully.</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <strong>Order Number:</strong>
+                            <span class="text-primary">#@Model.OrderNumber</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Order Date:</strong>
+                            <span>@Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <strong>Payment Status:</strong>
+                            @if (Model.PaymentStatus == "Paid")
+                            {
+                                <span class="badge bg-success">Paid</span>
+                            }
+                            else if (Model.PaymentStatus == "Cash on Delivery")
+                            {
+                                <span class="badge bg-warning">Cash on Delivery</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">@Model.PaymentStatus</span>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Transaction ID:</strong>
+                            <span class="text-muted">@(Model.TransactionId ?? "N/A")</span>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Order Items</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td>@item.Title</td>
+                                        <td>@item.Quantity</td>
+                                        <td>৳@item.Price.ToString("0.00")</td>
+                                        <td>৳@item.Total.ToString("0.00")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-primary">
+                                    <th colspan="3" class="text-end">Grand Total:</th>
+                                    <th>৳@Model.Total.ToString("0.00")</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="/Order/MyOrders" class="btn btn-primary">
+                            <i class="fas fa-list"></i> View My Orders
+                        </a>
+                        <a href="/Home/Menu" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-shopping-bag"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

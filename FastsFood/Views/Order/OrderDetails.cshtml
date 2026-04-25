@@ -1,0 +1,95 @@
+﻿@model FastsFood.Models.OrderHeader
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Order Details #ORD-@Model.Id.ToString("D6")</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Order Information</h6>
+                    <p class="mb-1">Order Date: @Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</p>
+                    <p class="mb-1">Status: @Model.OrderStatus</p>
+                    <p class="mb-1">Payment: @Model.PaymentStatus</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Delivery Information</h6>
+                    <p class="mb-1">Name: @Model.Name</p>
+                    <p class="mb-1">Phone: @Model.PhoneNumber</p>
+                </div>
+            </div>
+
+            <h6>Order Items</h6>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.Count</td>
+                                <td>৳@item.Price.ToString("0.00")</td>
+                                <td>৳@(item.Price * item.Count).ToString("0.00")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Subtotal:</th>
+                            <td>৳@Model.SubtTotal.ToString("0.00")</td>
+                        </tr>
+                        @if (Model.Coupondiscount > 0)
+                        {
+                            <tr>
+                                <th colspan="3" class="text-end">Discount:</th>
+                                <td>-৳@Model.Coupondiscount.ToString("0.00")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <th colspan="3" class="text-end">Total:</th>
+                            <td class="text-primary fw-bold">৳@Model.OrderTotal.ToString("0.00")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/Order/MyOrders" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Orders
+                </a>
+                @if (Model.OrderStatus != "Delivered" && Model.OrderStatus != "Cancelled")
+                {
+                    <button class="btn btn-danger ms-2" onclick="cancelOrder(@Model.Id)">
+                        Cancel Order
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cancelOrder(orderId) {
+        if (confirm('Are you sure you want to cancel this order?')) {
+            $.post('/Order/CancelOrder', { orderId: orderId }, function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            });
+        }
+    }
+</script>

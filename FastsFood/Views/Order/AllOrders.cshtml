@@ -1,0 +1,75 @@
+﻿@model List<FastsFood.Models.OrderHeader>
+@{
+    ViewData["Title"] = "All Orders - Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">All Orders</h6>
+        </div>
+        <div class="card-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Order Date</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>#ORD-@order.Id.ToString("D6")</td>
+                                <td>@order.Name</td>
+                                <td>@order.PhoneNumber</td>
+                                <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                <td>৳@order.OrderTotal.ToString("0.00")</td>
+                                <td>@order.PaymentStatus</td>
+                                <td>
+                                    @{
+                                        var statusClass = order.OrderStatus switch
+                                        {
+                                            "Pending" => "badge bg-warning",
+                                            "Confirmed" => "badge bg-info",
+                                            "Processing" => "badge bg-primary",
+                                            "OnTheWay" => "badge bg-secondary",
+                                            "Delivered" => "badge bg-success",
+                                            "Cancelled" => "badge bg-danger",
+                                            _ => "badge bg-secondary"
+                                        };
+                                    }
+                                    <span class="@statusClass">@order.OrderStatus</span>
+                                </td>
+                                <td>
+                                    <a asp-action="UpdateOrderStatus" asp-route-id="@order.Id" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Update
+                                    </a>
+                                    <a asp-action="OrderDetails" asp-controller="Order" asp-area="" asp-route-id="@order.Id" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
