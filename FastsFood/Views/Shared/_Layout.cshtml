@@ -3,81 +3,742 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FastsFood</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FastsFood.styles.css" asp-append-version="true" />
+    <title>@ViewData["Title"] - FastFood</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; }
+        :root {
+            --brand:      #ff6b35;
+            --brand-dk:   #e8521e;
+            --brand-lt:   #fff4ef;
+            --dark:       #0f0f1a;
+            --nav-bg:     #13131f;
+            --mid:        #6b6b80;
+            --soft:       #f8f8fc;
+            --border:     #ebebf5;
+            --white:      #ffffff;
+            --success:    #22c55e;
+            --warning:    #f59f00;
+            --danger:     #ef4444;
+            --radius:     14px;
+            --shadow:     0 8px 40px rgba(0,0,0,.12);
+        }
+        html, body { margin: 0; padding: 0; scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--soft);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+        main { flex: 1; margin-top: 0; padding-top: 0; }
+
+        /* ── Navbar ── */
+        .site-nav {
+            background: var(--nav-bg);
+            padding: 0;
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            box-shadow: 0 2px 24px rgba(0,0,0,.25);
+        }
+        .site-nav .container {
+            display: flex; align-items: stretch;
+            height: 64px; gap: 0;
+        }
+
+        /* Brand */
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none;
+            padding: 0 24px 0 0;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255,255,255,.07);
+            margin-right: 8px;
+        }
+        .nav-brand .logo-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dk) 100%);
+            display: grid; place-items: center;
+            font-size: 1.1rem; color: #fff;
+            box-shadow: 0 4px 12px rgba(255,107,53,.4);
+            flex-shrink: 0;
+        }
+        .nav-brand .logo-text {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.25rem; font-weight: 800;
+            color: #fff; letter-spacing: -.02em;
+        }
+        .nav-brand .logo-text span { color: var(--brand); }
+
+        /* Nav links */
+        .nav-links {
+            display: flex; align-items: stretch;
+            list-style: none; margin: 0; padding: 0;
+            flex: 1;
+        }
+        .nav-links > li { display: flex; align-items: stretch; }
+        .nav-links > li > a,
+        .nav-links > li > .nav-dd-toggle {
+            display: flex; align-items: center;
+            padding: 0 16px;
+            font-size: .875rem; font-weight: 500;
+            color: rgba(255,255,255,.65);
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: color .2s, border-color .2s;
+            cursor: pointer; background: none; border-top: none;
+            border-left: none; border-right: none;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .nav-links > li > a:hover,
+        .nav-links > li > .nav-dd-toggle:hover { color: #fff; }
+        .nav-links > li > a.active,
+        .nav-links > li.active > a { color: var(--brand); border-bottom-color: var(--brand); }
+
+        /* Dropdown */
+        .nav-dropdown { position: relative; }
+        .nav-dropdown .dropdown-panel {
+            position: absolute; top: calc(100% + 4px); left: 0;
+            background: #1c1c2e; border-radius: var(--radius);
+            min-width: 200px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.4);
+            border: 1px solid rgba(255,255,255,.08);
+            padding: 6px;
+            opacity: 0; pointer-events: none;
+            transform: translateY(8px);
+            transition: opacity .2s, transform .2s;
+        }
+        .nav-dropdown:hover .dropdown-panel,
+        .nav-dropdown:focus-within .dropdown-panel {
+            opacity: 1; pointer-events: all; transform: translateY(0);
+        }
+        .dropdown-panel a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px;
+            font-size: .84rem; color: rgba(255,255,255,.7);
+            text-decoration: none; border-radius: 8px;
+            transition: background .15s, color .15s;
+        }
+        .dropdown-panel a:hover { background: rgba(255,107,53,.12); color: var(--brand); }
+        .dropdown-panel a i { width: 16px; opacity: .7; font-size: .8rem; }
+        .dropdown-divider { height: 1px; background: rgba(255,255,255,.07); margin: 4px 0; }
+
+        /* Right side nav */
+        .nav-right {
+            display: flex; align-items: center;
+            list-style: none; margin: 0; padding: 0; gap: 4px;
+            margin-left: auto;
+        }
+
+        /* Cart button */
+        .cart-btn {
+            position: relative;
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 14px;
+            background: rgba(255,107,53,.12);
+            border: 1px solid rgba(255,107,53,.25);
+            border-radius: 10px;
+            color: var(--brand);
+            text-decoration: none;
+            font-size: .875rem; font-weight: 500;
+            transition: background .2s, border-color .2s;
+        }
+        .cart-btn:hover { background: rgba(255,107,53,.22); color: var(--brand); }
+        .cart-btn i { font-size: 1rem; }
+        #cartCount {
+            background: var(--brand);
+            color: #fff;
+            font-size: .68rem; font-weight: 700;
+            min-width: 18px; height: 18px;
+            border-radius: 9px; padding: 0 5px;
+            display: inline-flex; align-items: center; justify-content: center;
+            line-height: 1;
+        }
+
+        /* User button */
+        .user-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 14px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px;
+            color: rgba(255,255,255,.85);
+            font-size: .875rem; font-weight: 500;
+            cursor: pointer; transition: background .2s;
+        }
+        .user-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
+        .user-avatar {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand), #764ba2);
+            display: grid; place-items: center;
+            font-size: .7rem; color: #fff; font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Auth buttons */
+        .btn-nav-login {
+            padding: 7px 16px;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 10px;
+            color: rgba(255,255,255,.8);
+            text-decoration: none;
+            font-size: .84rem; font-weight: 500;
+            transition: all .2s;
+        }
+        .btn-nav-login:hover { border-color: rgba(255,255,255,.5); color: #fff; }
+        .btn-nav-register {
+            padding: 7px 18px;
+            background: var(--brand);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: .84rem; font-weight: 600;
+            transition: background .2s, box-shadow .2s;
+            box-shadow: 0 4px 14px rgba(255,107,53,.35);
+        }
+        .btn-nav-register:hover { background: var(--brand-dk); color: #fff; box-shadow: 0 6px 18px rgba(255,107,53,.45); }
+
+        /* Mobile toggle */
+        .mobile-toggle {
+            display: none;
+            background: none; border: none;
+            color: rgba(255,255,255,.7); font-size: 1.2rem;
+            padding: 8px; cursor: pointer;
+            margin-left: auto;
+        }
+
+        /* Admin badge */
+        .admin-badge {
+            font-size: .62rem; font-weight: 700;
+            background: linear-gradient(135deg, #f59f00, #e67700);
+            color: #fff; padding: 2px 7px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: .04em;
+        }
+
+        /* ── Footer ── */
+        .site-footer {
+            background: var(--nav-bg);
+            border-top: 1px solid rgba(255,255,255,.06);
+            padding: 56px 0 0;
+            margin-top: auto;
+        }
+        .footer-brand .logo-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-dk));
+            display: grid; place-items: center;
+            font-size: 1.2rem; color: #fff;
+            box-shadow: 0 4px 16px rgba(255,107,53,.35);
+            margin-bottom: 14px;
+        }
+        .footer-brand h4 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.3rem; font-weight: 800;
+            color: #fff; margin: 0 0 10px;
+        }
+        .footer-brand p { color: rgba(255,255,255,.45); font-size: .875rem; line-height: 1.7; }
+        .footer-socials { display: flex; gap: 8px; margin-top: 18px; }
+        .footer-socials a {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.1);
+            display: grid; place-items: center;
+            color: rgba(255,255,255,.5); font-size: .85rem;
+            text-decoration: none; transition: all .2s;
+        }
+        .footer-socials a:hover { background: rgba(255,107,53,.15); border-color: rgba(255,107,53,.3); color: var(--brand); }
+
+        .footer-heading {
+            font-family: 'Sora', sans-serif;
+            font-size: .8rem; font-weight: 700;
+            color: rgba(255,255,255,.35);
+            text-transform: uppercase; letter-spacing: .1em;
+            margin: 0 0 16px;
+        }
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a {
+            color: rgba(255,255,255,.55); font-size: .875rem;
+            text-decoration: none; transition: color .2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .footer-links a:hover { color: var(--brand); }
+        .footer-links a i { width: 14px; font-size: .75rem; opacity: .6; }
+
+        .footer-contact li {
+            display: flex; align-items: flex-start; gap: 10px;
+            color: rgba(255,255,255,.55); font-size: .875rem;
+            margin-bottom: 12px;
+        }
+        .footer-contact li i { color: var(--brand); margin-top: 2px; width: 14px; flex-shrink: 0; }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,.06);
+            margin-top: 48px; padding: 20px 0;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .footer-bottom p { color: rgba(255,255,255,.3); font-size: .8rem; margin: 0; }
+        .footer-bottom .pills { display: flex; gap: 6px; }
+        .footer-bottom .pill {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: .72rem; font-weight: 600;
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.35);
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Toast ── */
+        #toast-container {
+            position: fixed; top: 80px; right: 20px;
+            z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 18px;
+            background: var(--nav-bg);
+            border: 1px solid rgba(255,255,255,.1);
+            border-left: 3px solid var(--brand);
+            border-radius: 10px;
+            min-width: 260px; max-width: 340px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.3);
+            color: rgba(255,255,255,.9); font-size: .875rem;
+            animation: toastIn .3s ease;
+        }
+        .toast-item.success { border-left-color: var(--success); }
+        .toast-item.success .t-icon { color: var(--success); }
+        .toast-item.error   { border-left-color: var(--danger); }
+        .toast-item.error   .t-icon { color: var(--danger); }
+        .toast-item.warning { border-left-color: var(--warning); }
+        .toast-item.warning .t-icon { color: var(--warning); }
+        .toast-item.info    { border-left-color: #3b82f6; }
+        .toast-item.info    .t-icon { color: #3b82f6; }
+        .t-icon { font-size: 1rem; flex-shrink: 0; color: var(--brand); }
+        .t-msg  { flex: 1; line-height: 1.4; }
+        .t-close {
+            background: none; border: none;
+            color: rgba(255,255,255,.3); cursor: pointer;
+            font-size: .8rem; padding: 2px;
+            transition: color .15s;
+        }
+        .t-close:hover { color: rgba(255,255,255,.7); }
+        @@keyframes toastIn {
+            from { opacity: 0; transform: translateX(24px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @@keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); max-height: 80px; }
+            to   { opacity: 0; transform: translateX(24px); max-height: 0; padding: 0; margin: 0; }
+        }
+
+        /* ── Responsive ── */
+        @@media (max-width: 991px) {
+            .mobile-toggle { display: flex; align-items: center; }
+            .nav-links, .nav-right { display: none; }
+            .nav-links.open, .nav-right.open { display: flex; }
+            .site-nav .container { flex-wrap: wrap; height: auto; min-height: 64px; padding: 0 16px; }
+            .nav-links {
+                flex-direction: column; width: 100%;
+                background: #1a1a2c;
+                border-top: 1px solid rgba(255,255,255,.06);
+                padding: 8px 0;
+            }
+            .nav-links > li > a,
+            .nav-links > li > .nav-dd-toggle {
+                padding: 12px 16px; border-bottom: none;
+                width: 100%;
+            }
+            .nav-right {
+                flex-direction: column; align-items: stretch; width: 100%;
+                background: #1a1a2c;
+                padding: 8px 16px 16px;
+                border-top: 1px solid rgba(255,255,255,.04);
+                gap: 8px; margin-left: 0;
+            }
+            .dropdown-panel {
+                position: static; opacity: 1; pointer-events: all;
+                transform: none; box-shadow: none;
+                border: none; background: rgba(255,255,255,.04);
+                margin: 4px 0 4px 16px;
+            }
+            .nav-brand { border-right: none; }
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,107,53,.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FastsFood</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Category" asp-action="Index">Categories</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="SubCategory" asp-action="Index">SubCategories</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Item" asp-action="Index">Items</a>
-                        </li>
-                    </ul>
 
-                    
-                    <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">Hello, @User.Identity.Name!</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
-                                    <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                            </li>
-                        }
-                    </ul>
+<!-- ══ Navbar ══════════════════════════════════════════════════════════ -->
+<nav class="site-nav">
+    <div class="container">
 
+        <!-- Brand -->
+        <a class="nav-brand" asp-controller="Home" asp-action="Index">
+            <div class="logo-icon"><i class="fas fa-hamburger"></i></div>
+            <span class="logo-text">Fast<span>Food</span></span>
+        </a>
+
+        <!-- Mobile toggle -->
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main links -->
+        <ul class="nav-links" id="navLinks">
+            <li>
+                <a asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home" style="font-size:.8rem;opacity:.6"></i> Home
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Home" asp-action="Menu">
+                    <i class="fas fa-utensils" style="font-size:.8rem;opacity:.6"></i> Menu
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Home" asp-action="About">
+                    <i class="fas fa-info-circle" style="font-size:.8rem;opacity:.6"></i> About
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Home" asp-action="Contact">
+                    <i class="fas fa-envelope" style="font-size:.8rem;opacity:.6"></i> Contact
+                </a>
+            </li>
+
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <li class="nav-dropdown">
+                    <button class="nav-dd-toggle">
+                        <i class="fas fa-shield-alt" style="font-size:.8rem;opacity:.6"></i>
+                        Admin
+                        <span class="admin-badge">Panel</span>
+                        <i class="fas fa-chevron-down" style="font-size:.6rem;opacity:.5;margin-left:2px"></i>
+                    </button>
+                    <div class="dropdown-panel">
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index">
+                            <i class="fas fa-layer-group"></i> Categories
+                        </a>
+                        <a asp-area="Admin" asp-controller="SubCategory" asp-action="Index">
+                            <i class="fas fa-sitemap"></i> Sub-Categories
+                        </a>
+                        <a asp-area="Admin" asp-controller="Item" asp-action="Index">
+                            <i class="fas fa-burger"></i> Items
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a asp-area="Admin" asp-controller="User" asp-action="Index">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a asp-controller="Order" asp-action="AllOrders">
+                            <i class="fas fa-receipt"></i> All Orders
+                        </a>
+                    </div>
+                </li>
+            }
+        </ul>
+
+        <!-- Right side -->
+        <ul class="nav-right" id="navRight">
+
+            <!-- Cart -->
+            <li>
+                <a class="cart-btn" asp-controller="Cart" asp-action="Index">
+                    <i class="fas fa-shopping-bag"></i>
+                    Cart
+                    <span id="cartCount">0</span>
+                </a>
+            </li>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <!-- User dropdown -->
+                <li class="nav-dropdown">
+                    <button class="user-btn nav-dd-toggle">
+                        <div class="user-avatar">
+                            @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                        </div>
+                        <span style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                            @User.Identity.Name
+                        </span>
+                        <i class="fas fa-chevron-down" style="font-size:.65rem;opacity:.5"></i>
+                    </button>
+                    <div class="dropdown-panel" style="right:0;left:auto">
+                        <a asp-controller="Profile" asp-action="Index">
+                            <i class="fas fa-user-circle"></i> My Profile
+                        </a>
+                        <a asp-controller="Order" asp-action="MyOrders">
+                            <i class="fas fa-box"></i> My Orders
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="margin:0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" style="width:100%;background:none;border:none;padding:0;text-align:left">
+                                <span style="display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:.84rem;color:rgba(255,255,255,.7);border-radius:8px;cursor:pointer;transition:background .15s"
+                                      onmouseover="this.style.background='rgba(239,68,68,.12)';this.style.color='#ef4444'"
+                                      onmouseout="this.style.background='';this.style.color='rgba(255,255,255,.7)'">
+                                    <i class="fas fa-sign-out-alt" style="width:16px;opacity:.7;font-size:.8rem"></i> Logout
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <a class="btn-nav-login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                </li>
+                <li>
+                    <a class="btn-nav-register" asp-area="Identity" asp-page="/Account/Register">
+                        <i class="fas fa-user-plus" style="font-size:.8rem"></i> Register
+                    </a>
+                </li>
+            }
+        </ul>
+
+    </div>
+</nav>
+
+<!-- ══ Main Content ═════════════════════════════════════════════════════ -->
+<main>
+    @RenderBody()
+</main>
+
+<!-- ══ Footer ══════════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- Brand col -->
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-brand">
+                    <div class="logo-icon"><i class="fas fa-hamburger"></i></div>
+                    <h4>FastFood</h4>
+                    <p>Delicious food delivered hot and fresh to your doorstep. Quality ingredients, every single time.</p>
+                    <div class="footer-socials">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - FastsFood - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <!-- Quick links -->
+            <div class="col-lg-2 col-md-6 col-6">
+                <p class="footer-heading">Navigate</p>
+                <ul class="footer-links">
+                    <li><a asp-controller="Home" asp-action="Index"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a asp-controller="Home" asp-action="Menu"><i class="fas fa-chevron-right"></i> Menu</a></li>
+                    <li><a asp-controller="Home" asp-action="About"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a asp-controller="Home" asp-action="Contact"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- Account links -->
+            <div class="col-lg-2 col-md-6 col-6">
+                <p class="footer-heading">Account</p>
+                <ul class="footer-links">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li><a asp-controller="Profile" asp-action="Index"><i class="fas fa-chevron-right"></i> Profile</a></li>
+                        <li><a asp-controller="Order" asp-action="MyOrders"><i class="fas fa-chevron-right"></i> My Orders</a></li>
+                        <li><a asp-controller="Cart" asp-action="Index"><i class="fas fa-chevron-right"></i> My Cart</a></li>
+                    }
+                    else
+                    {
+                        <li><a asp-area="Identity" asp-page="/Account/Login"><i class="fas fa-chevron-right"></i> Login</a></li>
+                        <li><a asp-area="Identity" asp-page="/Account/Register"><i class="fas fa-chevron-right"></i> Register</a></li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-lg-4 col-md-6">
+                <p class="footer-heading">Get in touch</p>
+                <ul class="footer-links footer-contact list-unstyled">
+                    <li><i class="fas fa-map-marker-alt"></i> 123 Food Street, Dhaka, Bangladesh</li>
+                    <li><i class="fas fa-phone"></i> +880 1234 567890</li>
+                    <li><i class="fas fa-envelope"></i> info@fastfood.com</li>
+                    <li><i class="fas fa-clock"></i> Open daily: 10am – 11pm</li>
+                </ul>
+            </div>
+
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+        <!-- Bottom bar -->
+        <div class="footer-bottom">
+            <p>&copy; @DateTime.Now.Year FastFood. All rights reserved.</p>
+            <div class="pills">
+                <span class="pill">Privacy Policy</span>
+                <span class="pill">Terms of Service</span>
+                <span class="pill">Cookie Policy</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ══ Scripts ══════════════════════════════════════════════════════════ -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ── Mobile toggle ────────────────────────────────────────────────────
+    document.getElementById('mobileToggle').addEventListener('click', function () {
+        var links = document.getElementById('navLinks');
+        var right = document.getElementById('navRight');
+        var icon  = this.querySelector('i');
+        var open  = links.classList.toggle('open');
+        right.classList.toggle('open', open);
+        icon.className = open ? 'fas fa-times' : 'fas fa-bars';
+    });
+
+    // ── Active nav link ──────────────────────────────────────────────────
+    (function () {
+        var path = window.location.pathname.toLowerCase();
+        document.querySelectorAll('.nav-links > li > a').forEach(function (a) {
+            var href = a.getAttribute('href') || '';
+            if (href && href !== '/' && path.startsWith(href.toLowerCase())) {
+                a.classList.add('active');
+            } else if (href === '/' && path === '/') {
+                a.classList.add('active');
+            }
+        });
+    })();
+
+    // ── Toast system ─────────────────────────────────────────────────────
+    function showToast(message, type) {
+        type = type || 'success';
+        var icons = {
+            success: 'fa-check-circle',
+            error:   'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info:    'fa-info-circle'
+        };
+        var icon = icons[type] || icons.success;
+
+        var item = document.createElement('div');
+        item.className = 'toast-item ' + type;
+        item.innerHTML =
+            '<i class="fas ' + icon + ' t-icon"></i>' +
+            '<span class="t-msg">' + message + '</span>' +
+            '<button class="t-close" onclick="dismissToast(this.parentElement)">' +
+                '<i class="fas fa-times"></i>' +
+            '</button>';
+
+        document.getElementById('toast-container').appendChild(item);
+
+        setTimeout(function () { dismissToast(item); }, 3500);
+    }
+
+    function dismissToast(el) {
+        if (!el || !el.parentElement) return;
+        el.style.animation = 'toastOut .3s ease forwards';
+        setTimeout(function () { if (el.parentElement) el.parentElement.removeChild(el); }, 280);
+    }
+
+    // ── Cart count ───────────────────────────────────────────────────────
+    function updateCartCount() {
+        $.ajax({
+            url: '/Cart/GetCartCount',
+            type: 'GET',
+            success: function (count) {
+                var el = document.getElementById('cartCount');
+                if (el) el.textContent = count || 0;
+            },
+            error: function () {
+                var el = document.getElementById('cartCount');
+                if (el) el.textContent = '0';
+            }
+        });
+    }
+
+    // ── Add to cart ──────────────────────────────────────────────────────
+    function addToCart(itemId, quantity) {
+        quantity = quantity || 1;
+        $.ajax({
+            url: '/Cart/AddToCart',
+            type: 'POST',
+            data: { itemId: itemId, quantity: quantity },
+            success: function (res) {
+                if (res.success) {
+                    showToast(res.message || 'Added to cart!', 'success');
+                    updateCartCount();
+                } else {
+                    showToast(res.message || 'Could not add item.', 'error');
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 401) {
+                    showToast('Please login to add items to cart.', 'warning');
+                    setTimeout(function () { window.location.href = '/Identity/Account/Login'; }, 1600);
+                } else {
+                    showToast('Something went wrong!', 'error');
+                }
+            }
+        });
+    }
+
+    // ── Update quantity ──────────────────────────────────────────────────
+    function updateQuantity(itemId, quantity) {
+        if (quantity < 1) return;
+        $.ajax({
+            url: '/Cart/UpdateQuantity',
+            type: 'POST',
+            data: { itemId: itemId, quantity: quantity },
+            success: function (res) {
+                if (res.success) {
+                    updateCartCount();
+                    if (typeof updateCartTotal === 'function') updateCartTotal();
+                    if (typeof updateItemTotal  === 'function') updateItemTotal(itemId, quantity);
+                }
+            }
+        });
+    }
+
+    // ── Remove from cart ─────────────────────────────────────────────────
+    function removeFromCart(itemId) {
+        $.ajax({
+            url: '/Cart/RemoveFromCart',
+            type: 'POST',
+            data: { itemId: itemId },
+            success: function (res) {
+                if (res.success) {
+                    showToast('Item removed from cart.', 'info');
+                    updateCartCount();
+                    if (typeof updateCartTotal === 'function') updateCartTotal();
+                    var row = document.getElementById('cart-item-' + itemId);
+                    if (row) {
+                        $(row).fadeOut(300, function () {
+                            $(this).remove();
+                            if (!document.querySelector('.cart-item')) location.reload();
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    $(document).ready(function () {
+        updateCartCount();
+        setInterval(updateCartCount, 15000);
+    });
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -39,6 +39,20 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(7);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Add View Components
+builder.Services.AddControllersWithViews();
+
+// Add Newtonsoft.Json
 
 var app = builder.Build();
 
@@ -51,7 +65,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
+app.UseSession();
 // ✅ IMPORTANT: Order matters - Authentication before Authorization
 app.UseAuthentication();
 app.UseAuthorization();

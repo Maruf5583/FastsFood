@@ -27,4 +27,15 @@ namespace FastsFood.Models
         [ForeignKey("ApplicationUserId")]
         public virtual ApplicationUser ApplicationUser { get; set; }
     }
+
+    [Serializable]
+    public class CartItem
+    {
+        public int ItemId { get; set; }
+        public string Title { get; set; }
+        public string ImageUrl { get; set; }
+        public double Price { get; set; }
+        public int Quantity { get; set; }
+        public double Total => Price * Quantity;
+    }
 }
